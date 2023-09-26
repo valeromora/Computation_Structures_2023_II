@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +56,11 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int _write(int file, char *ptr, int len)
+{
+  HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, 10);
+  return len;
+}
 /* USER CODE END 0 */
 
 /**
@@ -94,7 +98,22 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_UART_Transmit(&huart2, (uint8_t *)"Hello World!\r\n", 14, 20);
+
+  for (uint8_t idx =0; idx <= 0x0F; idx++)
+	  printf("IDX: 0x%02X\r\n", idx);
+
+  /*for (uint8_t idx =0; idx <= 10; idx++)
+	  printf("Hello World!\r\n");*/
+
+  /*@third
+  printf("Hello World!\r\n");*/
+
+  /*@second
+  uint8_t my_str[] = "Hello world!\r\n";
+  HAL_UART_Transmit(&huart2, my_str, sizeof(my_str)-1, 10);*/
+
+  /*@fist
+   HAL_UART_Transmit(&huart2, (uint8_t *)"Hello World!\r\n", 14, 20);*/
   while (1)
   {
     /* USER CODE END WHILE */
