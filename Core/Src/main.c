@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +44,8 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+//inicializamos un string vacio para almacenar el valor que recibiremos
+uint8_t my_str[2] = "";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,14 +95,8 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-
-  for (uint8_t idx =0; idx <= 0x0F; idx++)
-	  printf("IDX: 0x%02X\r\n", idx);
+  /*for (uint8_t idx =0; idx <= 0x0F; idx++)
+	  printf("IDX: 0x%02X\r\n", idx);*/
 
   /*for (uint8_t idx =0; idx <= 10; idx++)
 	  printf("Hello World!\r\n");*/
@@ -114,8 +110,14 @@ int main(void)
 
   /*@fist
    HAL_UART_Transmit(&huart2, (uint8_t *)"Hello World!\r\n", 14, 20);*/
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+
   while (1)
   {
+	  HAL_UART_Receive_IT(&huart2, my_str, sizeof(my_str));
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -247,7 +249,51 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	// Ver el mensaje que acabo de recibir
+	HAL_UART_Transmit(&huart2, my_str, sizeof(my_str), 1);
+	// Para saltar línea (renglón)
+	HAL_UART_Transmit(&huart2,(uint8_t*)"\r\n", 2 , 1);
 
+
+
+		//Comparamos el mensaje que recibimos por UART
+		/*
+		 * strcmp:
+		 * Params:
+		 * ** str1: Primera cadena que se compara
+		 * ** str2: Segunda cade a comparar
+		 *
+		 * Returns:
+		 * ** <0 -> str1 es menor que str2
+		 * ** >0 -> str2 es menor que str1
+		 * ** 0 -> Iguales
+		 */
+		//uint8_t value = strcmp((char*)my_str,"ON");
+
+	if ((strcmp((char*)my_str,"ON")) == 0)
+		{
+			// Se enciende el LED
+		    HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
+		}
+
+		// Digita por UART el comando OF
+	else if ((strcmp((char*)my_str,"OF")) == 0)
+		{
+			// Se apaga el LED
+		  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
+		}
+
+		// Digita por UART un comando equivocado
+	else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t*)"Comando equivocado. Los comandos son: ON - OF \r\n", 48, 1);
+		}
+
+		// Paso 6: Volvemos a esperar un mensaje por UART con interrupción
+		HAL_UART_Receive_IT(&huart2, my_str, sizeof(my_str));
+}
 /* USER CODE END 4 */
 
 /**
